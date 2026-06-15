@@ -60,18 +60,24 @@ export function useNewtonRaphson() {
       return;
     }
 
-    const { fn, derivative, derivativeExpr } = parsed;
+    const { fn, derivative, derivativeExpr, secondDerivative } = parsed;
     const stopFn = STOP_FN[criterio];
     const iterations = [];
     let xn = Number(x0);
     let xPrev = null;
 
     for (let n = 0; n < Number(nMax); n++) {
-      let fxn, dfxn;
+      let fxn, dfxn, d2fxn = null, gPrime = null;
 
       try {
         fxn  = evalAt(fn, xn);
         dfxn = evalAt(derivative, xn);
+        if (secondDerivative) {
+          d2fxn = evalAt(secondDerivative, xn);
+          if (Math.abs(dfxn) > 1e-15) {
+            gPrime = Math.abs((fxn * d2fxn) / (dfxn * dfxn));
+          }
+        }
       } catch (e) {
         setResult({ iterations, status: 'parse-error', root: xn, errorMessage: `Error al evaluar en x=${xn}: ${e.message}`, derivativeExpr });
         return;
@@ -79,7 +85,7 @@ export function useNewtonRaphson() {
 
       const error = computeError(fxn, xn, xPrev, criterio);
 
-      iterations.push({ n: n + 1, xn, fxn, dfxn, error });
+      iterations.push({ n: n + 1, xn, fxn, dfxn, gPrime, error });
 
       // Check stop criterion (skip first iteration — no xPrev)
       if (xPrev !== null && stopFn(fxn, xn, xPrev, Number(tol))) {

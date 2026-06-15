@@ -1,8 +1,7 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: var(--color-bg);
+  height: 100%;
 }
 
 /* Header */
@@ -33,6 +32,7 @@
   display: grid;
   grid-template-columns: 44% 1fr;
   min-height: 0;
+  overflow: hidden;
 }
 
 .left {
@@ -46,6 +46,7 @@
   flex-direction: column;
   background: var(--color-surface-1);
   min-height: 0;
+  overflow: hidden;
 }
 
 /* Tab bar */

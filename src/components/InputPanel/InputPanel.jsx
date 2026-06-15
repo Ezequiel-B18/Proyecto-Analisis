@@ -11,7 +11,7 @@ const SYMBOL_BUTTONS = [
   { label: '÷',   value: '/' },
   { label: '^',   value: '^' },
   { label: '√',   value: 'sqrt(' },
-  { label: 'f(x)',value: '', special: true, label2: 'sin(' },
+  //{ label: 'f(x)',value: '', special: true, label2: 'sin(' },
   { label: 'sin', value: 'sin(' },
   { label: 'cos', value: 'cos(' },
   { label: 'ln',  value: 'log(' },

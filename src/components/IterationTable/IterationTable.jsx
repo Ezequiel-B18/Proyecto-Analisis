@@ -20,6 +20,7 @@ export default function IterationTable({ iterations }) {
             <th className={styles.th}>xₙ</th>
             <th className={styles.th}>f(xₙ)</th>
             <th className={styles.th}>f&apos;(xₙ)</th>
+            <th className={styles.th}>|g&apos;(xₙ)|</th>
             <th className={styles.th}>Error</th>
           </tr>
         </thead>
@@ -30,6 +31,7 @@ export default function IterationTable({ iterations }) {
               <td className={`${styles.td} ${styles.mono}`}>{fmt(row.xn)}</td>
               <td className={`${styles.td} ${styles.mono}`}>{fmt(row.fxn)}</td>
               <td className={`${styles.td} ${styles.mono}`}>{fmt(row.dfxn)}</td>
+              <td className={`${styles.td} ${styles.mono}`}>{fmt(row.gPrime)}</td>
               <td className={`${styles.td} ${styles.mono} ${styles.errorCol}`}>
                 {row.error !== null ? fmt(row.error) : '—'}
               </td>

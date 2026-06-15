@@ -2,13 +2,21 @@ import { useEffect, useRef, useMemo } from 'react';
 import styles from './FunctionGraph.module.css';
 
 /**
- * Evaluates a compiled math.js function over a range of x values.
- * Returns { xs, ys } with nulls on discontinuities.
+ * Este archivo es el que se encarga de renderizar el grafico interactivo de 
+ * la función f(x) y sus tangentes. Utiliza la librería Plotly.js para renderizar el gráfico.
+ * Referencias:
+ * parsedFn: es la funcion ingresada parseada por la libreria de math.js,
+ * iterations: es un arreglo de objetos que contiene todos los valores para cada iteracion,
+ * x0: es el valor inicial de la iteracion,
+ * root: es la raiz de la funcion (si es que la encontro)
+ * status: es el estado del metodo, osea si lo encontro, si llego al maximo de iteraciones, etc.
  */
+
+// Muestrea la funcion f para los valores de x en el rango [xMin, xMax].
 function sampleFunction(fn, xMin, xMax, points = 400) {
-  const xs = [];
-  const ys = [];
-  const step = (xMax - xMin) / points;
+  const xs = []; // Las x que vamos a usar para graficar
+  const ys = []; // Las y que vamos a usar para graficar
+  const step = (xMax - xMin) / points; // El paso entre cada x
   for (let i = 0; i <= points; i++) {
     const x = xMin + i * step;
     try {
@@ -23,9 +31,7 @@ function sampleFunction(fn, xMin, xMax, points = 400) {
   return { xs, ys };
 }
 
-/**
- * Builds tangent line traces: from each (xn, f(xn)) to the x-axis intersection.
- */
+// Obtiene los datos necesarios para graficar las rectas tangentes
 function buildTangentTraces(iterations) {
   return iterations.slice(0, -1).map((iter, i) => {
     const { xn, fxn, dfxn } = iter;
@@ -36,9 +42,9 @@ function buildTangentTraces(iterations) {
       y: [fxn, 0],
       mode: 'lines',
       type: 'scatter',
-      line: { color: `hsl(${30 + i * 40}, 90%, 60%)`, width: 1.5, dash: 'dot' },
-      name: `Tangente n=${i + 1}`,
-      showlegend: false,
+      line: { color: 'rgba(0, 229, 255, 0.5)', width: 1.5 }, // Línea sólida cian translúcida
+      name: 'Recta Tangente',
+      showlegend: i === 0, // Solo mostramos la primera en la leyenda para no duplicar
       hoverinfo: 'skip',
     };
   }).filter(Boolean);
@@ -50,15 +56,45 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
   const traces = useMemo(() => {
     if (!parsedFn) return null;
 
-    const center = root ?? (x0 !== null ? Number(x0) : 0);
-    const span = Math.max(5, Math.abs(center) * 1.5);
-    const xMin = center - span;
-    const xMax = center + span;
+    const center = root ?? (x0 !== null ? Number(x0) : 0); // Donde se centrara la vista, en la raiz o x0
+    
+    // Define el ancho total del grafico, para que se vea todo el recorrido por el que paso el metodo 
+    // para encontrar la raiz.
+    let xMin = center - 5;
+    let xMax = center + 5;
+    if (iterations && iterations.length > 0) {
+      const xValues = [Number(x0), ...iterations.map(it => it.xn)].filter(x => x !== null && !isNaN(x));
+      if (root !== null) xValues.push(root);
+      const minIterX = Math.min(...xValues);
+      const maxIterX = Math.max(...xValues);
+      const width = maxIterX - minIterX;
+      // Agregamos un margen mínimo de 1.5 o 1.5 veces el ancho del trayecto
+      const margin = Math.max(1.5, width * 1.5);
+      xMin = minIterX - margin;
+      xMax = maxIterX + margin;
+    }
 
     const { xs, ys } = sampleFunction(parsedFn, xMin, xMax);
 
+    // Define la altura del grafico para que se puedan ver bien las tangentes
+    let yMinVal = -5;
+    let yMaxVal = 5;
+    if (iterations && iterations.length > 0) {
+      const yValues = iterations.map(it => it.fxn);
+      if (x0 !== null && x0 !== undefined) {
+        try {
+          yValues.push(parsedFn.evaluate({ x: Number(x0) }));
+        } catch {}
+      }
+      const maxAbsY = Math.max(...yValues.map(Math.abs));
+      const margin = Math.max(2, maxAbsY * 1.5);
+      yMinVal = -margin;
+      yMaxVal = margin;
+    }
+
+// En esta parte se define el grafico, donde se muestra la funcion y las tangentes.
     const result = [
-      // x-axis reference line
+      // Linea de referencia del eje x
       {
         x: [xMin, xMax],
         y: [0, 0],
@@ -68,7 +104,7 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
         showlegend: false,
         hoverinfo: 'skip',
       },
-      // Function curve
+      // Curva de la funcion
       {
         x: xs,
         y: ys,
@@ -80,12 +116,12 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
       },
     ];
 
-    // Tangent lines
+    // Lineas tangentes
     if (iterations.length > 1) {
       result.push(...buildTangentTraces(iterations));
     }
 
-    // x₀ marker
+    // Marcador x₀
     if (x0 !== null && x0 !== undefined) {
       let y0 = 0;
       try { y0 = parsedFn.evaluate({ x: Number(x0) }); } catch {}
@@ -99,7 +135,7 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
       });
     }
 
-    // Root marker
+    // Marcador de la raiz
     if (status === 'success' && root !== null) {
       result.push({
         x: [root],
@@ -111,9 +147,11 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
       });
     }
 
-    return { traces: result, xMin, xMax };
+    return { traces: result, xMin, xMax, yMin: yMinVal, yMax: yMaxVal };
   }, [parsedFn, iterations, x0, root, status]);
 
+// Esta parte es la que se encarga de renderizar el grafico, 
+// donde se muestra la funcion y las tangentes.
   useEffect(() => {
     if (!containerRef.current || !traces) return;
 
@@ -135,6 +173,7 @@ export default function FunctionGraph({ parsedFn, iterations, x0, root, status }
           gridcolor: 'rgba(255,255,255,0.07)',
           zerolinecolor: 'rgba(255,255,255,0.2)',
           color: '#888',
+          range: [traces.yMin, traces.yMax],
         },
         legend: {
           bgcolor: 'rgba(30,30,30,0.7)',

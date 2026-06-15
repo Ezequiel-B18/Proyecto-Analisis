@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import InputPanel from './components/InputPanel/InputPanel';
+import InfoPanel from './components/InfoPanel/InfoPanel';
 import ResultPanel from './components/ResultPanel/ResultPanel';
 import IterationTable from './components/IterationTable/IterationTable';
 import FunctionGraph from './components/FunctionGraph/FunctionGraph';
@@ -8,13 +9,14 @@ import { parseFunction } from './utils/mathEngine';
 import styles from './App.module.css';
 
 const TABS = [
+  { id: 'info',      label: 'Info' },
   { id: 'resultado', label: 'Resultado' },
   { id: 'tabla',     label: 'Tabla' },
   { id: 'grafico',   label: 'Gráfico' },
 ];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('resultado');
+  const [activeTab, setActiveTab] = useState('info');
   const [lastParams, setLastParams] = useState(null);
   const { result, compute } = useNewtonRaphson();
 
@@ -71,6 +73,7 @@ export default function App() {
 
           {/* Tab content */}
           <div className={styles.tabContent}>
+            {activeTab === 'info' && <InfoPanel />}
             {activeTab === 'resultado' && (
               <ResultPanel
                 status={result.status}
@@ -97,7 +100,7 @@ export default function App() {
       </main>
 
       <footer className={styles.footer}>
-        Análisis Numérico — Método de Newton-Raphson
+        Análisis Numérico — Método de Newton-Raphson - Hecho por Ezequiel Blajevitch y Nahuel Quiroga
       </footer>
     </div>
   );

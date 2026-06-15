@@ -14,10 +14,20 @@ export function parseFunction(expr) {
   const derivativeExpr = derivativeNode.toString();
   const compiledDerivative = derivativeNode.compile();
 
+  // Compute symbolic second derivative w.r.t. x
+  let compiledSecondDerivative = null;
+  try {
+    const secondDerivativeNode = math.derivative(derivativeNode, 'x');
+    compiledSecondDerivative = secondDerivativeNode.compile();
+  } catch {
+    compiledSecondDerivative = null;
+  }
+
   return {
     fn: compiled,
     derivative: compiledDerivative,
     derivativeExpr,
+    secondDerivative: compiledSecondDerivative,
   };
 }
 

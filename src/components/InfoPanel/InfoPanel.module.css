@@ -1,0 +1,141 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--color-text);
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0.25rem 0;
+}
+
+.subTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.5rem 0;
+}
+
+/* Parameter cards */
+.paramList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.paramCard {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.paramName {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--color-accent);
+}
+
+.paramDesc {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+}
+
+.paramDesc code {
+  background: var(--color-surface-3);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.85em;
+  color: var(--color-text);
+}
+
+/* Criteria cards */
+.criteriaIntro {
+  margin: 0 0 0.6rem 0;
+  color: var(--color-text-muted);
+}
+
+.criteriaList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.criteriaCard {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.65rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.criteriaHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.criteriaLabel {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+}
+
+.criteriaTag {
+  font-size: 0.75rem;
+  background: var(--color-surface-3);
+  color: var(--color-text-muted);
+  padding: 0.1em 0.5em;
+  border-radius: 99px;
+}
+
+.criteriaFormula {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.92rem;
+  color: var(--color-text);
+  background: var(--color-surface-3);
+  padding: 0.3em 0.6em;
+  border-radius: 6px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.criteriaDesc {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.83rem;
+}
+
+.footer {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface-2);
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
