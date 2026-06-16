@@ -1,20 +1,19 @@
 import * as math from 'mathjs';
 
 /**
- * Parses a function expression string and returns a compiled evaluable object.
- * @param {string} expr - e.g. "x^3 - 3*x - 1"
- * @returns {{ fn: math.EvalFunction, derivative: math.EvalFunction, derivativeExpr: string }}
+ * Parsea una funcion y retorna un objeto con la funcion compilada, 
+ * la derivada compilada y la expresion de la derivada.
  */
 export function parseFunction(expr) {
-  // Compile the function
+  // Compila la funcion
   const compiled = math.compile(expr);
 
-  // Compute symbolic derivative w.r.t. x
+  // Calcula la primer derivada respecto a x
   const derivativeNode = math.derivative(expr, 'x');
   const derivativeExpr = derivativeNode.toString();
   const compiledDerivative = derivativeNode.compile();
 
-  // Compute symbolic second derivative w.r.t. x
+  // Calcula la segunda derivada respecto a x
   let compiledSecondDerivative = null;
   try {
     const secondDerivativeNode = math.derivative(derivativeNode, 'x');
@@ -22,7 +21,7 @@ export function parseFunction(expr) {
   } catch {
     compiledSecondDerivative = null;
   }
-
+// Retorna las funciones
   return {
     fn: compiled,
     derivative: compiledDerivative,
@@ -32,32 +31,27 @@ export function parseFunction(expr) {
 }
 
 /**
- * Evaluates a compiled expression at x.
- * @param {math.EvalFunction} compiled
- * @param {number} x
- * @returns {number}
+ * Evalua la funcion en un x.
  */
 export function evalAt(compiled, x) {
   return compiled.evaluate({ x });
 }
 
 /**
- * Validates that the function is non-linear (derivative is not a constant).
- * @param {string} expr
- * @returns {{ isLinear: boolean, reason: string }}
+ * Valida que la funcion no sea lineal.
  */
 export function validateNonLinear(expr) {
   try {
     const d1 = math.derivative(expr, 'x');
     const d2 = math.derivative(d1, 'x');
-    // If second derivative simplifies to 0, f is linear or constant
+    // Si la segunda derivada es 0, f es lineal o constante
     const d2Value = d2.toString().trim();
     if (d2Value === '0') {
       return { isLinear: true, reason: 'La función es lineal (la derivada es constante). Newton-Raphson no tiene sentido para funciones lineales.' };
     }
     return { isLinear: false, reason: '' };
   } catch {
-    // If we can't compute, assume it's fine and let the algorithm catch errors
+    // Si no se puede calcular, se asume que esta bien y se deja que el algoritmo atrape los errores
     return { isLinear: false, reason: '' };
   }
 }

@@ -3,6 +3,9 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import styles from './InputPanel.module.css';
 
+// Katex es la libreria de javascript que utilizamos para renderizar las expresiones matematicas
+// en el navegador
+
 const SYMBOL_BUTTONS = [
   { label: 'CLR', value: 'CLR', special: true },
   { label: '+',   value: '+' },
@@ -36,14 +39,29 @@ export default function InputPanel({ onCompute }) {
   const [katexHtml, setKatexHtml] = useState('');
   const inputRef = useRef(null);
 
-  // Render KaTeX preview
+  // Aqui se renderiza Katex
   useEffect(() => {
     try {
-      // Simple replacements to make math.js syntax render nicely in KaTeX
-      const latexExpr = expr
+      // Balancear paréntesis abiertos al vuelo para que no se rompa la previsualización a medio escribir
+      let balanced = expr;
+      const openCount = (balanced.match(/\(/g) || []).length;
+      const closeCount = (balanced.match(/\)/g) || []).length;
+      if (openCount > closeCount) {
+        balanced += ')'.repeat(openCount - closeCount);
+      }
+
+      let latexExpr = balanced
         .replace(/\*/g, ' \\cdot ')
-        .replace(/pi/g, '\\pi')
-        .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+        .replace(/pi/g, '\\pi');
+
+      // Esta parte del codigo se encarga de soportar anidamientos (ej. sqrt(sqrt(x)))
+      let prev;
+      do {
+        prev = latexExpr;
+        latexExpr = latexExpr.replace(/sqrt\(([^)]*)\)/g, '\\sqrt{$1}');
+      } while (latexExpr !== prev);
+
+      latexExpr = latexExpr
         .replace(/sin\(/g, '\\sin(')
         .replace(/cos\(/g, '\\cos(')
         .replace(/log\(/g, '\\ln(')
@@ -54,6 +72,7 @@ export default function InputPanel({ onCompute }) {
     }
   }, [expr]);
 
+// Esta parte es la que se encarga de insertar los simbolos en la expresion donde esta el cursor
   const insertSymbol = (value) => {
     if (value === 'CLR') {
       setExpr('');
@@ -65,13 +84,13 @@ export default function InputPanel({ onCompute }) {
     const end   = input.selectionEnd;
     const next  = expr.substring(0, start) + value + expr.substring(end);
     setExpr(next);
-    // Restore cursor after React re-render
     setTimeout(() => {
       input.focus();
       input.setSelectionRange(start + value.length, start + value.length);
     }, 0);
   };
 
+// Envia los datos al componente ResultPanel  
   const handleSubmit = (e) => {
     e.preventDefault();
     onCompute({ expr, x0, tol, criterio, nMax });
@@ -83,7 +102,7 @@ export default function InputPanel({ onCompute }) {
         Calcula la raíz de <span className={styles.accent}>f(x)</span> con Newton-Raphson
       </h1>
 
-      {/* Symbol buttons */}
+      {/* Botones de los simbolos */}
       <div className={styles.symbolBar}>
         {SYMBOL_BUTTONS.map((btn) => (
           <button
@@ -98,7 +117,7 @@ export default function InputPanel({ onCompute }) {
         ))}
       </div>
 
-      {/* Function input */}
+      {/* Input de la funcion */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.inputRow}>
           <label className={styles.label} htmlFor="expr-input">f(x) =</label>
@@ -116,7 +135,7 @@ export default function InputPanel({ onCompute }) {
           <button className={styles.goBtn} type="submit">Ir</button>
         </div>
 
-        {/* KaTeX preview */}
+        {/* Preview de la funcion */}
         {katexHtml && (
           <div
             className={styles.preview}
@@ -128,7 +147,7 @@ export default function InputPanel({ onCompute }) {
           Usá paréntesis cuando sea necesario. Sintaxis: <code>x^2</code>, <code>sin(x)</code>, <code>sqrt(x)</code>, <code>log(x)</code> (= ln).
         </p>
 
-        {/* Numeric params */}
+        {/* Parametros numericos */}
         <div className={styles.params}>
           <div className={styles.paramGroup}>
             <label htmlFor="x0-input" className={styles.paramLabel}>x₀ (aprox. inicial)</label>
