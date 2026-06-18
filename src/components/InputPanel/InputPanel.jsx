@@ -27,6 +27,49 @@ const CRITERIA = [
   { value: 'III', label: 'Criterio III — Error relativo < Tol' },
 ];
 
+// Ejemplos cargables con un clic. El primero es el problema de Ingeniería Informática:
+// el umbral de tamaño donde conviene cambiar de un algoritmo O(n²) a uno O(n·log n),
+// como hacen los ordenamientos híbridos reales (Introsort, Timsort).
+const EXAMPLES = [
+  {
+    label: 'Umbral de algoritmos (Informática)',
+    featured: true,
+    expr: '5*x - 30*log(x)/log(2)',
+    x0: '20', tol: '1e-6', criterio: 'I', nMax: '50',
+    explanation: (
+      <>
+        <strong>Problema:</strong> ¿a partir de qué tamaño <code>n</code> conviene cambiar de un
+        algoritmo de ordenamiento <code>O(n²)</code> (inserción) a uno <code>O(n·log n)</code>{' '}
+        (merge sort)? Es la decisión que toman los ordenamientos híbridos reales como{' '}
+        <em>Introsort</em> (C++) y <em>Timsort</em> (Python, Java).
+        <br /><br />
+        <strong>Modelo:</strong> con los tiempos medidos <code>T_ins = 5·n²</code> y{' '}
+        <code>T_merge = 30·n·log₂(n)</code>, el punto de cruce cumple{' '}
+        <code>5·n² = 30·n·log₂(n)</code>. Dividiendo por <code>n</code> se obtiene la ecuación no
+        lineal <code>f(n) = 5·n − 30·log₂(n) = 0</code>, que no tiene solución algebraica y se
+        resuelve con Newton-Raphson. <em>(La calculadora siempre usa <code>x</code> como variable,
+        así que acá <code>x</code> representa el tamaño <code>n</code>. Y <code>log</code> es el ln
+        natural, por eso <code>log(x)/log(2)</code> = log₂).</em>
+        <br /><br />
+        <strong>Resultado:</strong> la raíz <code>n* ≈ 29,21</code> es el umbral. Para arreglos de{' '}
+        <strong>menos de ~30</strong> elementos conviene inserción; para <strong>30 o más</strong>,
+        merge sort. Mirá la pestaña <strong>Tabla</strong> (la convergencia) y <strong>Gráfico</strong>{' '}
+        (las tangentes hasta la raíz).
+      </>
+    ),
+  },
+  {
+    label: 'Polinomio x³ − 3x − 1',
+    expr: 'x^3 - 3*x - 1',
+    x0: '2', tol: '1e-6', criterio: 'I', nMax: '50',
+  },
+  {
+    label: 'cos(x) − x',
+    expr: 'cos(x) - x',
+    x0: '1', tol: '1e-6', criterio: 'I', nMax: '50',
+  },
+];
+
 export default function InputPanel({ onCompute }) {
   const [expr, setExpr]       = useState('x^3 - 3*x - 1');
   const [x0, setX0]           = useState('2');
@@ -34,6 +77,7 @@ export default function InputPanel({ onCompute }) {
   const [criterio, setCriterio] = useState('I');
   const [nMax, setNMax]       = useState('50');
   const [katexHtml, setKatexHtml] = useState('');
+  const [exampleInfo, setExampleInfo] = useState(null);
   const inputRef = useRef(null);
 
   // Render KaTeX preview
@@ -55,6 +99,7 @@ export default function InputPanel({ onCompute }) {
   }, [expr]);
 
   const insertSymbol = (value) => {
+    setExampleInfo(null); // edición manual: ya no corresponde la explicación del ejemplo
     if (value === 'CLR') {
       setExpr('');
       return;
@@ -70,6 +115,16 @@ export default function InputPanel({ onCompute }) {
       input.focus();
       input.setSelectionRange(start + value.length, start + value.length);
     }, 0);
+  };
+
+  const loadExample = (ex) => {
+    setExpr(ex.expr);
+    setX0(ex.x0);
+    setTol(ex.tol);
+    setCriterio(ex.criterio);
+    setNMax(ex.nMax);
+    setExampleInfo(ex.explanation ?? null);
+    onCompute({ expr: ex.expr, x0: ex.x0, tol: ex.tol, criterio: ex.criterio, nMax: ex.nMax });
   };
 
   const handleSubmit = (e) => {
@@ -98,6 +153,22 @@ export default function InputPanel({ onCompute }) {
         ))}
       </div>
 
+      {/* Ejemplos cargables */}
+      <div className={styles.exampleBar}>
+        <span className={styles.exampleLabel}>Ejemplos:</span>
+        {EXAMPLES.map((ex) => (
+          <button
+            key={ex.label}
+            type="button"
+            className={`${styles.exampleBtn} ${ex.featured ? styles.exampleFeatured : ''}`}
+            onClick={() => loadExample(ex)}
+            title={`Cargar: f(x) = ${ex.expr}`}
+          >
+            {ex.label}
+          </button>
+        ))}
+      </div>
+
       {/* Function input */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.inputRow}>
@@ -108,7 +179,7 @@ export default function InputPanel({ onCompute }) {
             className={styles.exprInput}
             type="text"
             value={expr}
-            onChange={(e) => setExpr(e.target.value)}
+            onChange={(e) => { setExpr(e.target.value); setExampleInfo(null); }}
             placeholder="ej. x^3 - 3*x - 1"
             spellCheck={false}
             autoComplete="off"
@@ -124,9 +195,25 @@ export default function InputPanel({ onCompute }) {
           />
         )}
 
+        {/* Nota de variable para el ejemplo de Informática */}
+        {exampleInfo && (
+          <p className={styles.varNote}>
+            ℹ️ En este ejemplo, <code>x</code> representa el tamaño <strong>n</strong> del arreglo
+            (la calculadora siempre usa <code>x</code> como variable).
+          </p>
+        )}
+
         <p className={styles.hint}>
           Usá paréntesis cuando sea necesario. Sintaxis: <code>x^2</code>, <code>sin(x)</code>, <code>sqrt(x)</code>, <code>log(x)</code> (= ln).
         </p>
+
+        {/* Explicación del ejemplo cargado */}
+        {exampleInfo && (
+          <div className={styles.exampleInfo}>
+            <div className={styles.exampleInfoTitle}>¿Cómo funciona este ejemplo?</div>
+            <p className={styles.exampleInfoBody}>{exampleInfo}</p>
+          </div>
+        )}
 
         {/* Numeric params */}
         <div className={styles.params}>
