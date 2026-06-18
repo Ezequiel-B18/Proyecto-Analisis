@@ -93,6 +93,39 @@ export default function InfoPanel() {
 
       <hr className={styles.divider} />
 
+      <h3 className={styles.subTitle}>Aplicación en Ingeniería Informática</h3>
+      <p className={styles.intro}>
+        Los ordenamientos <strong>híbridos</strong> reales (como <em>Introsort</em> en C++ o
+        <em> Timsort</em> en Python y Java) usan ordenamiento por <strong>inserción</strong> para
+        arreglos chicos y <em>merge/quick sort</em> para los grandes. ¿A partir de qué tamaño
+        <code> n</code> conviene cambiar de algoritmo?
+      </p>
+
+      <div className={styles.paramList}>
+        <div className={styles.paramCard}>
+          <span className={styles.paramName}>Planteo del problema</span>
+          <p className={styles.paramDesc}>
+            Midiendo los tiempos: inserción <code>T = 5·n²</code> y merge <code>T = 30·n·log₂(n)</code>.
+            El <strong>punto de cruce</strong> es donde ambos cuestan lo mismo:
+            <code> 5·n² = 30·n·log₂(n)</code>. Dividiendo por <code>n</code> queda la ecuación no
+            lineal <code>f(n) = 5·n − 30·log₂(n) = 0</code>, sin solución algebraica → la resuelve
+            Newton-Raphson.
+          </p>
+        </div>
+        <div className={styles.paramCard}>
+          <span className={styles.paramName}>Resolución</span>
+          <p className={styles.paramDesc}>
+            Cargá el ejemplo <strong>«Umbral de algoritmos (Informática)»</strong> de arriba
+            (<code>5*x - 30*log(x)/log(2)</code>, con <code>log</code> = ln natural). La raíz es
+            <code> n* ≈ 29,21</code>: para arreglos de <strong>menos de ~30</strong> elementos conviene
+            inserción; para <strong>30 o más</strong>, merge sort. Coincide con los umbrales reales
+            (16 a 32).
+          </p>
+        </div>
+      </div>
+
+      <hr className={styles.divider} />
+
       <p className={styles.footer}>
         El método puede fallar si <strong>f&apos;(xₙ) = 0</strong> en alguna iteración
         (tangente horizontal) o si la función no converge desde el x₀ elegido.
