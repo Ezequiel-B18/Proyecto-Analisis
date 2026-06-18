@@ -3,6 +3,9 @@ import katex from 'katex';
 import 'katex/dist/katex.min.css';
 import styles from './InputPanel.module.css';
 
+// Katex es la libreria de javascript que utilizamos para renderizar las expresiones matematicas
+// en el navegador
+
 const SYMBOL_BUTTONS = [
   { label: 'CLR', value: 'CLR', special: true },
   { label: '+',   value: '+' },
@@ -80,14 +83,29 @@ export default function InputPanel({ onCompute }) {
   const [exampleInfo, setExampleInfo] = useState(null);
   const inputRef = useRef(null);
 
-  // Render KaTeX preview
+  // Aqui se renderiza Katex
   useEffect(() => {
     try {
-      // Simple replacements to make math.js syntax render nicely in KaTeX
-      const latexExpr = expr
+      // Balancear paréntesis abiertos al vuelo para que no se rompa la previsualización a medio escribir
+      let balanced = expr;
+      const openCount = (balanced.match(/\(/g) || []).length;
+      const closeCount = (balanced.match(/\)/g) || []).length;
+      if (openCount > closeCount) {
+        balanced += ')'.repeat(openCount - closeCount);
+      }
+
+      let latexExpr = balanced
         .replace(/\*/g, ' \\cdot ')
-        .replace(/pi/g, '\\pi')
-        .replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}')
+        .replace(/pi/g, '\\pi');
+
+      // Esta parte del codigo se encarga de soportar anidamientos (ej. sqrt(sqrt(x)))
+      let prev;
+      do {
+        prev = latexExpr;
+        latexExpr = latexExpr.replace(/sqrt\(([^)]*)\)/g, '\\sqrt{$1}');
+      } while (latexExpr !== prev);
+
+      latexExpr = latexExpr
         .replace(/sin\(/g, '\\sin(')
         .replace(/cos\(/g, '\\cos(')
         .replace(/log\(/g, '\\ln(')
@@ -98,6 +116,7 @@ export default function InputPanel({ onCompute }) {
     }
   }, [expr]);
 
+// Esta parte es la que se encarga de insertar los simbolos en la expresion donde esta el cursor
   const insertSymbol = (value) => {
     setExampleInfo(null); // edición manual: ya no corresponde la explicación del ejemplo
     if (value === 'CLR') {
@@ -110,7 +129,6 @@ export default function InputPanel({ onCompute }) {
     const end   = input.selectionEnd;
     const next  = expr.substring(0, start) + value + expr.substring(end);
     setExpr(next);
-    // Restore cursor after React re-render
     setTimeout(() => {
       input.focus();
       input.setSelectionRange(start + value.length, start + value.length);
@@ -127,6 +145,7 @@ export default function InputPanel({ onCompute }) {
     onCompute({ expr: ex.expr, x0: ex.x0, tol: ex.tol, criterio: ex.criterio, nMax: ex.nMax });
   };
 
+// Envia los datos al componente ResultPanel  
   const handleSubmit = (e) => {
     e.preventDefault();
     onCompute({ expr, x0, tol, criterio, nMax });
@@ -138,7 +157,7 @@ export default function InputPanel({ onCompute }) {
         Calcula la raíz de <span className={styles.accent}>f(x)</span> con Newton-Raphson
       </h1>
 
-      {/* Symbol buttons */}
+      {/* Botones de los simbolos */}
       <div className={styles.symbolBar}>
         {SYMBOL_BUTTONS.map((btn) => (
           <button
@@ -169,7 +188,23 @@ export default function InputPanel({ onCompute }) {
         ))}
       </div>
 
-      {/* Function input */}
+      {/* Ejemplos cargables */}
+      <div className={styles.exampleBar}>
+        <span className={styles.exampleLabel}>Ejemplos:</span>
+        {EXAMPLES.map((ex) => (
+          <button
+            key={ex.label}
+            type="button"
+            className={`${styles.exampleBtn} ${ex.featured ? styles.exampleFeatured : ''}`}
+            onClick={() => loadExample(ex)}
+            title={`Cargar: f(x) = ${ex.expr}`}
+          >
+            {ex.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Input de la funcion */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.inputRow}>
           <label className={styles.label} htmlFor="expr-input">f(x) =</label>
@@ -187,7 +222,7 @@ export default function InputPanel({ onCompute }) {
           <button className={styles.goBtn} type="submit">Ir</button>
         </div>
 
-        {/* KaTeX preview */}
+        {/* Preview de la funcion */}
         {katexHtml && (
           <div
             className={styles.preview}
@@ -215,7 +250,15 @@ export default function InputPanel({ onCompute }) {
           </div>
         )}
 
-        {/* Numeric params */}
+        {/* Explicación del ejemplo cargado */}
+        {exampleInfo && (
+          <div className={styles.exampleInfo}>
+            <div className={styles.exampleInfoTitle}>¿Cómo funciona este ejemplo?</div>
+            <p className={styles.exampleInfoBody}>{exampleInfo}</p>
+          </div>
+        )}
+
+        {/* Parametros numericos */}
         <div className={styles.params}>
           <div className={styles.paramGroup}>
             <label htmlFor="x0-input" className={styles.paramLabel}>x₀ (aprox. inicial)</label>

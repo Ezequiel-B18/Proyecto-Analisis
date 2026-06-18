@@ -1,49 +1,33 @@
 /**
- * Stopping criteria for Newton-Raphson iteration.
- * Each function returns true when the stop condition is met.
+ * Criterios de parada del metodo Newton-Raphson.
+ * Cada funcion retorna true cuando se cumple la condicion de parada.
  */
 
 /**
- * Criterion I — by image: |f(xn)| < tol
- * @param {number} fxn - f(xn)
- * @param {number} tol
- * @returns {boolean}
+ * Criterio I — por imagen: |f(xn)| < tol
  */
 export function criterioI(fxn, tol) {
   return Math.abs(fxn) < tol;
 }
 
 /**
- * Criterion II — by absolute difference: |xn - xPrev| < tol
- * @param {number} xn
- * @param {number} xPrev
- * @param {number} tol
- * @returns {boolean}
+ * Criterio II — por diferencia absoluta: |xn - xPrev| < tol
  */
 export function criterioII(xn, xPrev, tol) {
   return Math.abs(xn - xPrev) < tol;
 }
 
 /**
- * Criterion III — by relative error: |xn - xPrev| / |xn| < tol
- * Only valid when xn !== 0.
- * @param {number} xn
- * @param {number} xPrev
- * @param {number} tol
- * @returns {boolean}
+ * Criterio III — por error relativo: |xn - xPrev| / |xn| < tol
+ * Solo valido cuando xn !== 0.
  */
 export function criterioIII(xn, xPrev, tol) {
-  if (Math.abs(xn) === 0) return false; // undefined, can't use this criterion
+  if (Math.abs(xn) === 0) return false;
   return Math.abs(xn - xPrev) / Math.abs(xn) < tol;
 }
 
 /**
- * Computes the error value displayed in the table for each criterion.
- * @param {number} fxn
- * @param {number} xn
- * @param {number} xPrev
- * @param {'I'|'II'|'III'} criterio
- * @returns {number}
+ * Calcula el error que se muestra en la tabla para cada criterio.
  */
 export function computeError(fxn, xn, xPrev, criterio) {
   if (xPrev === null) return null;

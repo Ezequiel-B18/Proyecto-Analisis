@@ -24,6 +24,7 @@ import { criterioI, criterioII, criterioIII, computeError } from '../utils/stopC
  * @property {string} derivativeExpr
  */
 
+// Criterios de parada del metodo
 const STOP_FN = {
   I:   (fxn, xn, xPrev, tol) => criterioI(fxn, tol),
   II:  (fxn, xn, xPrev, tol) => criterioII(xn, xPrev, tol),
@@ -31,20 +32,19 @@ const STOP_FN = {
 };
 
 /**
- * Core Newton-Raphson hook.
- * Returns compute function + result state.
+ * Principal calculo de Newton-Raphson.
  */
 export function useNewtonRaphson() {
   const [result, setResult] = useState(/** @type {NewtonResult} */ ({
-    iterations: [],
-    status: 'idle',
-    root: null,
-    errorMessage: '',
-    derivativeExpr: '',
+    iterations: [], //iteraciones del metodo
+    status: 'idle', //estado del metodo
+    root: null, //raiz de la funcion
+    errorMessage: '', //mensaje de error
+    derivativeExpr: '', //expresion de la derivada
   }));
 
   const compute = useCallback(({ expr, x0, tol, criterio, nMax }) => {
-    // --- Parse ---
+    // parsea la funcion para math.js
     let parsed;
     try {
       parsed = parseFunction(expr);
@@ -53,37 +53,40 @@ export function useNewtonRaphson() {
       return;
     }
 
-    // --- Linearity check ---
+// Chequea que no sea una funcion lineal
     const { isLinear, reason } = validateNonLinear(expr);
     if (isLinear) {
       setResult({ iterations: [], status: 'linear', root: null, errorMessage: reason, derivativeExpr: parsed.derivativeExpr });
       return;
     }
 
+// Settea las expresiones, el criterio, las iteraciones y el primer valor y sus anteriores valores
     const { fn, derivative, derivativeExpr, secondDerivative } = parsed;
     const stopFn = STOP_FN[criterio];
     const iterations = [];
     let xn = Number(x0);
     let xPrev = null;
 
+  // Evalua el metodo y calcula los valores del paso actual
     for (let n = 0; n < Number(nMax); n++) {
       let fxn, dfxn, d2fxn = null, gPrime = null;
 
       try {
-        fxn  = evalAt(fn, xn);
-        dfxn = evalAt(derivative, xn);
+        fxn  = evalAt(fn, xn); // f(xn)
+        dfxn = evalAt(derivative, xn); // f'(xn)
         if (secondDerivative) {
-          d2fxn = evalAt(secondDerivative, xn);
+          d2fxn = evalAt(secondDerivative, xn); // f''(xn)
           if (Math.abs(dfxn) > 1e-15) {
-            gPrime = Math.abs((fxn * d2fxn) / (dfxn * dfxn));
+            gPrime = Math.abs((fxn * d2fxn) / (dfxn * dfxn)); // |g'(xn)|
           }
         }
-      } catch (e) {
+      } catch (e) { 
         setResult({ iterations, status: 'parse-error', root: xn, errorMessage: `Error al evaluar en x=${xn}: ${e.message}`, derivativeExpr });
         return;
       }
 
-      const error = computeError(fxn, xn, xPrev, criterio);
+// Calcula el error y frena el metodo si se cumple
+      const error = computeError(fxn, xn, xPrev, criterio); 
 
       iterations.push({ n: n + 1, xn, fxn, dfxn, gPrime, error });
 
@@ -93,17 +96,18 @@ export function useNewtonRaphson() {
         return;
       }
 
-      // Zero derivative guard
+      // Se fija que la derivada no sea cero
       if (Math.abs(dfxn) < 1e-15) {
         setResult({ iterations, status: 'zero-derivative', root: xn, errorMessage: `La derivada f'(x) ≈ 0 en x = ${xn.toPrecision(8)}. La tangente es horizontal, el método no puede continuar.`, derivativeExpr });
         return;
       }
 
+// Genera la proxima iteracion del metodo
       xPrev = xn;
       xn = xn - fxn / dfxn;
     }
 
-    // Reached max iterations
+    // Esto es en caso de que se alcance el max de iteraciones
     setResult({ iterations, status: 'max-iter', root: xn, errorMessage: `Se alcanzó el máximo de ${nMax} iteraciones sin converger con la tolerancia pedida.`, derivativeExpr });
   }, []);
 

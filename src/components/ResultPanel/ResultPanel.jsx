@@ -1,5 +1,6 @@
 import styles from './ResultPanel.module.css';
 
+// Aca definimos los estados que puede tener el componente dados por el hook
 const STATUS_CONFIG = {
   idle: null,
   success: {
@@ -43,18 +44,18 @@ export default function ResultPanel({ status, root, errorMessage, derivativeExpr
 
   return (
     <div className={styles.panel}>
-      {/* Status badge */}
+      {/* Status */}
       <div className={`${styles.badge} ${styles[config.className]}`}>
         <span className={styles.badgeIcon}>{config.icon}</span>
         <span>{config.label}</span>
       </div>
 
-      {/* Error message */}
+      {/* Mensaje de error */}
       {errorMessage && (
         <div className={styles.errorMsg}>{errorMessage}</div>
       )}
 
-      {/* Root value */}
+      {/* Valor de la raiz */}
       {root !== null && (
         <div className={styles.rootCard}>
           <span className={styles.rootLabel}>Raíz aproximada (α)</span>
@@ -62,7 +63,7 @@ export default function ResultPanel({ status, root, errorMessage, derivativeExpr
         </div>
       )}
 
-      {/* Derivative */}
+      {/* Derivada */}
       {derivativeExpr && (
         <div className={styles.derivCard}>
           <span className={styles.derivLabel}>Derivada calculada</span>
@@ -70,7 +71,7 @@ export default function ResultPanel({ status, root, errorMessage, derivativeExpr
         </div>
       )}
 
-      {/* Summary */}
+      {/* Resumen de iteraciones */}
       {iterations.length > 0 && (
         <div className={styles.summary}>
           Convergió en <strong>{iterations.length}</strong> iteración{iterations.length !== 1 ? 'es' : ''}.

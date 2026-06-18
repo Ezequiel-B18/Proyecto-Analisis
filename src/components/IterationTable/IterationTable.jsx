@@ -1,5 +1,6 @@
 import styles from './IterationTable.module.css';
 
+// Formatea los numeros, redondea a 8 decimales
 const fmt = (n, decimals = 8) => {
   if (n === null || n === undefined) return '—';
   if (!isFinite(n)) return String(n);
@@ -7,6 +8,8 @@ const fmt = (n, decimals = 8) => {
 };
 
 export default function IterationTable({ iterations }) {
+
+  // Aca verificamos si el usuario ya le dio al boton Ir ya que habria iteraciones en caso de que si
   if (!iterations || iterations.length === 0) {
     return <p className={styles.empty}>No hay iteraciones para mostrar.</p>;
   }
