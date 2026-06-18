@@ -74,13 +74,13 @@ const EXAMPLES = [
 ];
 
 export default function InputPanel({ onCompute }) {
-  const [expr, setExpr]       = useState('x^3 - 3*x - 1');
-  const [x0, setX0]           = useState('2');
+  const [expr, setExpr]       = useState('5*x - 30*log(x)/log(2)');
+  const [x0, setX0]           = useState('20');
   const [tol, setTol]         = useState('1e-6');
   const [criterio, setCriterio] = useState('I');
   const [nMax, setNMax]       = useState('50');
   const [katexHtml, setKatexHtml] = useState('');
-  const [exampleInfo, setExampleInfo] = useState(null);
+  const [exampleInfo, setExampleInfo] = useState(EXAMPLES[0].explanation);
   const inputRef = useRef(null);
 
   // Aqui se renderiza Katex
@@ -188,22 +188,6 @@ export default function InputPanel({ onCompute }) {
         ))}
       </div>
 
-      {/* Ejemplos cargables */}
-      <div className={styles.exampleBar}>
-        <span className={styles.exampleLabel}>Ejemplos:</span>
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex.label}
-            type="button"
-            className={`${styles.exampleBtn} ${ex.featured ? styles.exampleFeatured : ''}`}
-            onClick={() => loadExample(ex)}
-            title={`Cargar: f(x) = ${ex.expr}`}
-          >
-            {ex.label}
-          </button>
-        ))}
-      </div>
-
       {/* Input de la funcion */}
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.inputRow}>
@@ -241,22 +225,6 @@ export default function InputPanel({ onCompute }) {
         <p className={styles.hint}>
           Usá paréntesis cuando sea necesario. Sintaxis: <code>x^2</code>, <code>sin(x)</code>, <code>sqrt(x)</code>, <code>log(x)</code> (= ln).
         </p>
-
-        {/* Explicación del ejemplo cargado */}
-        {exampleInfo && (
-          <div className={styles.exampleInfo}>
-            <div className={styles.exampleInfoTitle}>¿Cómo funciona este ejemplo?</div>
-            <p className={styles.exampleInfoBody}>{exampleInfo}</p>
-          </div>
-        )}
-
-        {/* Explicación del ejemplo cargado */}
-        {exampleInfo && (
-          <div className={styles.exampleInfo}>
-            <div className={styles.exampleInfoTitle}>¿Cómo funciona este ejemplo?</div>
-            <p className={styles.exampleInfoBody}>{exampleInfo}</p>
-          </div>
-        )}
 
         {/* Parametros numericos */}
         <div className={styles.params}>
