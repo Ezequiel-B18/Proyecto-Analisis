@@ -107,8 +107,7 @@ implementa los tres criterios clásicos y permite elegir cuál usar:
 - **Criterio I** controla qué tan cerca de cero está la función; es el más intuitivo.
 - **Criterio II** controla cuánto se mueve la aproximación entre pasos consecutivos.
 - **Criterio III** es el Criterio II normalizado: mide el error en términos *relativos* al
-  tamaño de la aproximación. Es el más adecuado cuando la raíz es un número grande. No es
-  aplicable si `xₙ = 0`.
+  tamaño de la aproximación. Es el más adecuado cuando la raíz es un número grande. No es aplicable si `xₙ = 0`.
 
 ---
 

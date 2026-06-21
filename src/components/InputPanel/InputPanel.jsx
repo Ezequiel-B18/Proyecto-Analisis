@@ -175,17 +175,20 @@ export default function InputPanel({ onCompute }) {
       {/* Ejemplos cargables */}
       <div className={styles.exampleBar}>
         <span className={styles.exampleLabel}>Ejemplos:</span>
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex.label}
-            type="button"
-            className={`${styles.exampleBtn} ${ex.featured ? styles.exampleFeatured : ''}`}
-            onClick={() => loadExample(ex)}
-            title={`Cargar: f(x) = ${ex.expr}`}
-          >
-            {ex.label}
-          </button>
-        ))}
+        {EXAMPLES.map((ex) => {
+          const isActive = expr === ex.expr && x0 === ex.x0 && tol === ex.tol && criterio === ex.criterio && nMax === ex.nMax;
+          return (
+            <button
+              key={ex.label}
+              type="button"
+              className={`${styles.exampleBtn} ${isActive ? styles.exampleFeatured : ''}`}
+              onClick={() => loadExample(ex)}
+              title={`Cargar: f(x) = ${ex.expr}`}
+            >
+              {ex.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Input de la funcion */}
